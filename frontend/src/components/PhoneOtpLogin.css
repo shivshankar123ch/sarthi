@@ -1,0 +1,390 @@
+.phone-login-page {
+  --phone-ink: #17364b;
+  --phone-muted: #6a7d8b;
+  --phone-sky: #40bce9;
+  --phone-blue: #188bbd;
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 28px 20px;
+  color: var(--phone-ink);
+  background:
+    radial-gradient(ellipse at 8% 12%, rgba(64, 188, 233, 0.16), transparent 28rem),
+    radial-gradient(ellipse at 95% 92%, rgba(24, 139, 189, 0.11), transparent 30rem),
+    #f5fbff;
+}
+
+.phone-login-page--with-road {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+}
+
+.phone-login-card {
+  width: min(100%, 510px);
+  overflow: hidden;
+  border: 1px solid rgba(33, 117, 153, 0.12);
+  border-radius: 28px;
+  background: #fff;
+  box-shadow: 0 26px 90px rgba(27, 96, 130, 0.12);
+  animation: phone-login-appear 420ms ease both;
+}
+
+.phone-login-road {
+  width: min(100%, 510px);
+  height: 92px;
+  overflow: hidden;
+  border: 1px solid rgba(33, 117, 153, 0.12);
+  border-radius: 18px;
+  background: #eaf8ff;
+  box-shadow: 0 12px 35px rgba(27, 96, 130, 0.08);
+}
+
+.phone-login-road img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.phone-login-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px 24px;
+  background:
+    radial-gradient(circle at 15% 50%, rgba(64, 188, 233, 0.13), transparent 10rem),
+    linear-gradient(120deg, #eaf8ff, #f3fbff);
+}
+
+.phone-login-brand .brand-logo {
+  font-size: 27px;
+}
+
+.phone-login-brand .brand-logo-car {
+  width: 46px;
+  height: 27px;
+}
+
+.phone-login-tagline {
+  display: none;
+}
+
+.phone-login-content {
+  padding: 30px 36px 28px;
+}
+
+.driver-booking-hero {
+  position: relative;
+  isolation: isolate;
+  margin-bottom: 25px;
+  padding: 23px 23px 19px;
+  overflow: hidden;
+  border: 1px solid rgba(24, 139, 189, 0.14);
+  border-radius: 20px;
+  background-color: #edf8fc;
+}
+
+.driver-booking-hero::before {
+  position: absolute;
+  z-index: -1;
+  background-image:
+    linear-gradient(105deg, rgba(247, 252, 255, 0.91) 0%, rgba(247, 252, 255, 0.8) 48%, rgba(235, 248, 253, 0.46) 100%),
+    var(--driver-road-image);
+  background-position: center, center 55%;
+  background-size: cover;
+  content: "";
+  inset: 0;
+}
+
+.driver-booking-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--phone-blue);
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+}
+
+.driver-booking-eyebrow i {
+  color: var(--phone-sky);
+  font-size: 16px;
+}
+
+.driver-booking-hero h1 {
+  max-width: 360px;
+  margin: 11px 0 9px;
+  color: #17364b;
+  font-size: clamp(29px, 7vw, 39px);
+  font-weight: 800;
+  letter-spacing: -0.065em;
+  line-height: 1.05;
+}
+
+.driver-booking-hero h1 span {
+  color: var(--phone-blue);
+}
+
+.driver-booking-description {
+  max-width: 380px;
+  margin: 0;
+  color: #17364b;
+  font-size: 14.3px;
+  font-weight: 700;
+  line-height: 1.7;
+}
+
+.driver-copy-highlight {
+  color: #123b70;
+  font-weight: 800;
+}
+
+.driver-booking-highlight {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: #e4f6fd;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.driver-booking-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 17px;
+}
+
+.driver-booking-options span {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  gap: 5px;
+  padding: 0 9px;
+  border: 1px solid #761f2a;
+  border-radius: 999px;
+  color: #fff;
+  background: #761f2a;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.driver-booking-options i {
+  color: #ffd9df;
+  font-size: 13px;
+}
+
+.phone-login-content h1:not(.driver-booking-hero h1) {
+  margin: 10px 0 8px;
+  color: var(--phone-ink);
+  font-size: clamp(24px, 6vw, 29px);
+  font-weight: 750;
+  letter-spacing: -0.05em;
+  line-height: 1.18;
+}
+
+.phone-login-description {
+  margin: 0 0 24px;
+  color: var(--phone-muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.phone-login-description strong {
+  color: var(--phone-ink);
+}
+
+.phone-login-label {
+  display: block;
+  margin-bottom: 9px;
+  color: #365266;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.phone-login-content .mb-7 {
+  margin-bottom: 17px;
+}
+
+.phone-login-content select,
+.phone-login-content input {
+  min-height: 50px;
+  border: 1px solid #dce8f0;
+  border-radius: 11px;
+  background: #f9fcfe;
+  color: var(--phone-ink);
+  font-size: 14px;
+}
+
+.phone-login-content select:focus,
+.phone-login-content input:focus {
+  border-color: var(--phone-sky);
+  outline: 3px solid rgba(64, 188, 233, 0.16);
+}
+
+.phone-login-content .phone-login-otp-input {
+  width: 100%;
+  margin-bottom: 16px;
+  padding: 0 16px;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.45em;
+}
+
+.phone-login-submit {
+  display: flex;
+  width: 100%;
+  min-height: 51px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 0;
+  border-radius: 11px;
+  color: #fff;
+  background: linear-gradient(105deg, var(--phone-blue), var(--phone-sky));
+  box-shadow: 0 9px 21px rgba(24, 139, 189, 0.22);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  transition: filter 160ms ease, transform 160ms ease;
+}
+
+.phone-login-submit:hover:not(:disabled) {
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+}
+
+.phone-login-submit:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.phone-login-back,
+.phone-login-resend {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 0;
+  border: 0;
+  color: var(--phone-blue);
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.phone-login-resend {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 14px 0 0;
+}
+
+.phone-login-resend:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.phone-login-error {
+  margin: 15px 0 0;
+  padding: 10px 12px;
+  border: 1px solid #f1c8c2;
+  border-radius: 10px;
+  color: #a33428;
+  background: #fff5f3;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.phone-login-signup {
+  margin: 22px 0 0;
+  color: var(--phone-muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.phone-login-signup a {
+  color: var(--phone-blue);
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.phone-login-footer {
+  display: flex;
+  min-height: 53px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 25px;
+  border-top: 1px solid #edf2f6;
+  color: #7a8c9b;
+  font-size: 10px;
+}
+
+.phone-login-footer span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.phone-login-footer i {
+  color: var(--phone-blue);
+  font-size: 14px;
+}
+
+.phone-login-footer a {
+  color: var(--phone-ink);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+@keyframes phone-login-appear {
+  from { opacity: 0; transform: translateY(9px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 480px) {
+  .phone-login-page {
+    align-items: start;
+    padding: 16px 13px;
+  }
+
+  .phone-login-card {
+    border-radius: 22px;
+  }
+
+  .phone-login-brand {
+    padding: 18px 19px;
+  }
+
+  .phone-login-brand .brand-logo {
+    font-size: 23px;
+  }
+
+  .phone-login-content {
+    padding: 21px 18px 22px;
+  }
+
+  .driver-booking-hero {
+    margin-bottom: 22px;
+    padding: 20px 18px 17px;
+    border-radius: 17px;
+  }
+
+  .driver-booking-hero h1 {
+    font-size: clamp(30px, 8.5vw, 37px);
+  }
+
+  .phone-login-footer {
+    padding: 0 19px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phone-login-card {
+    animation: none;
+  }
+}
