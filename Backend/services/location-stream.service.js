@@ -4,6 +4,7 @@ const createKafkaClient = require('../kafka');
 const CAPTAIN_LOCATIONS_KEY = 'captain:locations';
 const LOCATION_KEY_PREFIX = 'captain:location:';
 const LOCATION_TTL_SECONDS = 30;
+const REDIS_STARTUP_TIMEOUT_MS = 30000;
 
 let redisClient;
 let producer;
@@ -16,6 +17,25 @@ function isValidLocation(location) {
         Number.isFinite(location.longitude) &&
         Math.abs(location.latitude) <= 90 &&
         Math.abs(location.longitude) <= 180;
+}
+
+function waitForRedisReady(client) {
+    if (client.status === 'ready') {
+        return Promise.resolve();
+    }
+
+    return new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+            client.removeListener('ready', onReady);
+            reject(new Error(`Redis did not become ready within ${REDIS_STARTUP_TIMEOUT_MS}ms`));
+        }, REDIS_STARTUP_TIMEOUT_MS);
+        function onReady() {
+            clearTimeout(timeout);
+            resolve();
+        }
+
+        client.once('ready', onReady);
+    });
 }
 
 async function cacheLocation(client, captainId, location) {
@@ -89,8 +109,11 @@ module.exports.startLocationStream = async (onLocationEvent) => {
         throw new Error(`Missing location-service configuration: ${missingVariables.join(', ')}`);
     }
 
+    const kafka = createKafkaClient();
+    const kafkaProducer = kafka.producer();
+    const kafkaConsumer = kafka.consumer({ groupId: process.env.KAFKA_GROUP_ID });
+
     const redisOptions = {
-        lazyConnect: true,
         maxRetriesPerRequest: 3,
         connectTimeout: 10000,
         retryStrategy(times) {
@@ -104,19 +127,22 @@ module.exports.startLocationStream = async (onLocationEvent) => {
     const client = new Redis(process.env.REDIS_URL, redisOptions);
     client.on('connect', () => console.log('Redis connecting...'));
     client.on('ready', () => console.log('Redis ready'));
-    client.on('error', error => console.error('Redis client error:', error.message));
+    client.on('error', error => {
+        console.error('Redis client error:', error.code || 'NO_CODE', error.message);
+    });
 
-    const kafka = createKafkaClient();
-    const kafkaProducer = kafka.producer();
-    const kafkaConsumer = kafka.consumer({ groupId: process.env.KAFKA_GROUP_ID });
+    let kafkaProducerConnected = false;
+    let kafkaConsumerConnected = false;
 
     try {
-        await client.connect();
+        await waitForRedisReady(client);
         const pingResponse = await client.ping();
         console.log('Redis ping response:', pingResponse);
 
         await kafkaProducer.connect();
+        kafkaProducerConnected = true;
         await kafkaConsumer.connect();
+        kafkaConsumerConnected = true;
         await kafkaConsumer.subscribe({ topic: process.env.KAFKA_TOPIC, fromBeginning: false });
 
         await kafkaConsumer.run({
@@ -128,11 +154,11 @@ module.exports.startLocationStream = async (onLocationEvent) => {
         consumer = kafkaConsumer;
         topic = process.env.KAFKA_TOPIC;
     } catch (error) {
-        await Promise.allSettled([
-            kafkaConsumer.disconnect(),
-            kafkaProducer.disconnect(),
-            Promise.resolve().then(() => client.disconnect())
-        ]);
+        const closeOperations = [];
+        if (kafkaConsumerConnected) closeOperations.push(kafkaConsumer.disconnect());
+        if (kafkaProducerConnected) closeOperations.push(kafkaProducer.disconnect());
+        closeOperations.push(Promise.resolve().then(() => client.disconnect()));
+        await Promise.allSettled(closeOperations);
         throw error;
     }
 };
