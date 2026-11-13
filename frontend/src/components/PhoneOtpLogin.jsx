@@ -45,7 +45,7 @@ const PhoneOtpLogin = ({ accountType = 'user', showRoadAnimation = false }) => {
     } catch (error) {
       logOtpRequestError('send', error)
       setErrorMessage(
-        error.response?.data?.message || error.message || 'OTP bhejne mein dikkat hui. Dobara koshish karein.',
+        error.response?.data?.message || error.message || 'Unable to send OTP. Please try again.',
       )
     } finally {
       setIsLoading(false)
@@ -64,7 +64,7 @@ const PhoneOtpLogin = ({ accountType = 'user', showRoadAnimation = false }) => {
       )
 
       if (!response.data.verified) {
-        setErrorMessage('OTP verify nahi hua. Dobara koshish karein.')
+        setErrorMessage('OTP verification failed. Please try again.')
         return
       }
 
@@ -72,11 +72,11 @@ const PhoneOtpLogin = ({ accountType = 'user', showRoadAnimation = false }) => {
     } catch (error) {
       logOtpRequestError('verify', error)
       if (error.response?.status === 503) {
-        setErrorMessage('Server par 2Factor OTP setup nahi hai. Backend API key configure karein.')
+        setErrorMessage('OTP verification is currently unavailable. Please try again later.')
       } else if (error.response) {
-        setErrorMessage(error.response.data?.message || 'OTP verify nahi hua. Dobara koshish karein.')
+        setErrorMessage(error.response.data?.message || 'OTP verification failed. Please try again.')
       } else {
-        setErrorMessage(error.message || 'OTP verify nahi hua. Dobara koshish karein.')
+        setErrorMessage(error.message || 'OTP verification failed. Please try again.')
       }
     } finally {
       setIsLoading(false)
@@ -94,7 +94,7 @@ const PhoneOtpLogin = ({ accountType = 'user', showRoadAnimation = false }) => {
       <section className="phone-login-card" aria-labelledby="phone-login-title">
         <div className="phone-login-brand">
           <BrandLogo />
-          <span className="phone-login-tagline">Aapka safar, aapke haath mein</span>
+          <span className="phone-login-tagline">Your journey, in your hands</span>
         </div>
 
         <div className="phone-login-content">
@@ -138,7 +138,7 @@ const PhoneOtpLogin = ({ accountType = 'user', showRoadAnimation = false }) => {
                   inputId="mobile-number"
                 />
                 <button className="phone-login-submit" type="submit" disabled={isLoading}>
-                  {isLoading ? 'Code bhej rahe hain…' : 'OTP verify'}
+                  {isLoading ? 'Sending OTP…' : 'Send OTP'}
                   <i className="ri-arrow-right-line" aria-hidden="true" />
                 </button>
               </form>
@@ -147,11 +147,11 @@ const PhoneOtpLogin = ({ accountType = 'user', showRoadAnimation = false }) => {
             <>
               <button className="phone-login-back" type="button" onClick={changeNumber}>
                 <i className="ri-arrow-left-line" aria-hidden="true" />
-                Number badlein
+                Change number
               </button>
-              <h1 id="phone-login-title">Code enter karein</h1>
+              <h1 id="phone-login-title">Enter your code</h1>
               <p className="phone-login-description">
-                <strong>{phone}</strong> par bheja 6-digit verification code enter karein.
+                A 6-digit verification code was sent to <strong>{phone}</strong>. Enter it below.
               </p>
 
               <form onSubmit={submitOtp}>
@@ -170,7 +170,7 @@ const PhoneOtpLogin = ({ accountType = 'user', showRoadAnimation = false }) => {
                   value={otp}
                 />
                 <button className="phone-login-submit" type="submit" disabled={isLoading}>
-                  {isLoading ? 'Verify kar rahe hain…' : 'Verify karke login karein'}
+                  {isLoading ? 'Verifying…' : 'Verify and log in'}
                   <i className="ri-arrow-right-line" aria-hidden="true" />
                 </button>
               </form>
@@ -187,7 +187,7 @@ const PhoneOtpLogin = ({ accountType = 'user', showRoadAnimation = false }) => {
         </div>
 
         <div className="phone-login-footer">
-          <span><i className="ri-shield-check-line" aria-hidden="true" /> Aapka number secure hai</span>
+          <span><i className="ri-shield-check-line" aria-hidden="true" /> Your number is secure</span>
           <Link to={otherLoginPath}>{otherLoginLabel}</Link>
         </div>
       </section>
