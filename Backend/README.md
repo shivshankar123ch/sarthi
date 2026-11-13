@@ -4,16 +4,18 @@
 
 The backend requires MongoDB, Redis, and Kafka to be running before it starts.
 Set `MONGODB_URI` in `Backend/.env` to your MongoDB connection string; for a
-local MongoDB instance, use `mongodb://127.0.0.1:27017/NextDriver`. Set
-`REDIS_URL`, `KAFKA_BROKERS`, `KAFKA_CLIENT_ID`, `KAFKA_TOPIC`, and
-`KAFKA_GROUP_ID` in `Backend/.env` for the live driver-location stream. The
-Kafka topic must already exist. Set `MAPBOX_SECRET_TOKEN` to a secret Mapbox
-access token with geocoding and directions-matrix access. Keep the token on the
-backend and out of source control. Start the API from the `Backend` directory
-with `npx nodemon server.js`. The HTTP server opens its port before it connects
-to MongoDB and initializes Redis and Kafka. Existing email-only user records are
-preserved, but existing email-only user/captain records need a phone number
-added before those accounts can use mobile-number login.
+local MongoDB instance, use `mongodb://127.0.0.1:27017/NextDriver`. Configure
+Redis with `REDIS_HOST` and `REDIS_PORT`; `REDIS_USERNAME` defaults to `default`,
+and `REDIS_PASSWORD` is optional when authentication is not enabled. Set
+`KAFKA_BROKERS`, `KAFKA_CLIENT_ID`, `KAFKA_TOPIC`, and `KAFKA_GROUP_ID` in
+`Backend/.env` for the live driver-location stream. The Kafka topic must already
+exist. Set `MAPBOX_SECRET_TOKEN` to a secret Mapbox access token with geocoding
+and directions-matrix access. Keep the token on the backend and out of source
+control. Start the API from the `Backend` directory with `npx nodemon
+server.js`. The HTTP server opens its port before it connects to MongoDB and
+initializes Redis and Kafka. Existing email-only user records are preserved,
+but existing email-only user/captain records need a phone number added before
+those accounts can use mobile-number login.
 
 To start the local Kafka broker and create the configured default
 `driver-location` topic, run `docker compose -f ..\docker-compose.yml up -d`

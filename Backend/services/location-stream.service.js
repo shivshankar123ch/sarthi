@@ -76,7 +76,8 @@ module.exports.startLocationStream = async (onLocationEvent) => {
     }
 
     const requiredVariables = [
-        'REDIS_URL',
+        'REDIS_HOST',
+        'REDIS_PORT',
         'KAFKA_BROKERS',
         'KAFKA_CLIENT_ID',
         'KAFKA_TOPIC',
@@ -87,15 +88,25 @@ module.exports.startLocationStream = async (onLocationEvent) => {
         throw new Error(`Missing location-service configuration: ${missingVariables.join(', ')}`);
     }
 
+    const redisPort = Number(process.env.REDIS_PORT);
+    if (!Number.isInteger(redisPort) || redisPort < 1 || redisPort > 65535) {
+        throw new Error('REDIS_PORT must be an integer between 1 and 65535');
+    }
+
     const client = createClient({
-        url: process.env.REDIS_URL,
+        username: process.env.REDIS_USERNAME || 'default',
+        password: process.env.REDIS_PASSWORD,
         socket: {
+            host: process.env.REDIS_HOST,
+            port: redisPort,
             connectTimeout: 5000,
             reconnectStrategy: retries => retries < 3
                 ? (retries + 1) * 200
                 : new Error('Redis connection retries exceeded')
         }
     });
+    client.on('connect', () => console.log('Redis connecting...'));
+    client.on('ready', () => console.log('Redis authenticated and ready!'));
     client.on('error', error => console.error('Redis client error:', error.message));
 
     const kafka = createKafkaClient();
