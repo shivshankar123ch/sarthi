@@ -5,6 +5,7 @@ import { CaptainDataContext } from '../context/CapatainContext'
 import PhoneNumberInput from '../components/PhoneNumberInput'
 import BrandLogo from '../components/BrandLogo'
 import { autoVehicleOptions, carVehicleOptions, truckVehicleOptions } from '../constants/vehicleOptions'
+import { getSignupErrorMessage } from '../utils/getSignupErrorMessage'
 
 const CaptainSignup = () => {
   const navigate = useNavigate()
@@ -29,67 +30,100 @@ const CaptainSignup = () => {
   const [drivingLicenceImage, setDrivingLicenceImage] = useState(null)
   const [policeVerificationImage, setPoliceVerificationImage] = useState(null)
   const [captainPhotoImage, setCaptainPhotoImage] = useState(null)
+  const [signupError, setSignupError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const submitHandler = async (event) => {
     event.preventDefault()
+    setSignupError('')
+    setIsSubmitting(true)
 
-    const captainData = new FormData()
-    captainData.append('fullname[firstname]', firstName)
-    captainData.append('fullname[lastname]', lastName)
-    captainData.append('phone', `${countryCode}${mobileNumber}`)
-    if (alternateMobileNumber) {
-      captainData.append('alternatePhone', `${alternateCountryCode}${alternateMobileNumber}`)
-    }
-    captainData.append('password', password)
-    captainData.append('vehicle[vehicleType]', vehicleType)
-    if (vehicleType === 'car') {
-      captainData.append('vehicle[carCategory]', carCategory)
-      captainData.append('vehicle[carModel]', carModel)
-    }
-    if (vehicleType === 'auto') {
-      captainData.append('vehicle[autoCategory]', autoCategory)
-      captainData.append('vehicle[autoModel]', autoModel)
-    }
-    if (vehicleType === 'truck') {
-      captainData.append('vehicle[truckCategory]', truckCategory)
-      captainData.append('vehicle[truckModel]', truckModel)
-    }
-    captainData.append('aadhaarImage', aadhaarImage)
-    captainData.append('panImage', panImage)
-    captainData.append('drivingLicenceImage', drivingLicenceImage)
-    captainData.append('policeVerificationImage', policeVerificationImage)
-    captainData.append('captainPhotoImage', captainPhotoImage)
+    try {
+      const captainData = new FormData()
+      captainData.append('fullname[firstname]', firstName)
+      captainData.append('fullname[lastname]', lastName)
+      captainData.append('phone', `${countryCode}${mobileNumber}`)
+      if (alternateMobileNumber) {
+        captainData.append('alternatePhone', `${alternateCountryCode}${alternateMobileNumber}`)
+      }
+      captainData.append('password', password)
+      captainData.append('vehicle[vehicleType]', vehicleType)
+      if (vehicleType === 'car') {
+        captainData.append('vehicle[carCategory]', carCategory)
+        captainData.append('vehicle[carModel]', carModel)
+      }
+      if (vehicleType === 'auto') {
+        captainData.append('vehicle[autoCategory]', autoCategory)
+        captainData.append('vehicle[autoModel]', autoModel)
+      }
+      if (vehicleType === 'truck') {
+        captainData.append('vehicle[truckCategory]', truckCategory)
+        captainData.append('vehicle[truckModel]', truckModel)
+      }
+      captainData.append('aadhaarImage', aadhaarImage)
+      captainData.append('panImage', panImage)
+      captainData.append('drivingLicenceImage', drivingLicenceImage)
+      captainData.append('policeVerificationImage', policeVerificationImage)
+      captainData.append('captainPhotoImage', captainPhotoImage)
 
-    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/captains/register`, captainData)
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/captains/register`, captainData)
+      if (response.status !== 201) {
+        setSignupError(response.data?.message || 'Account create nahi hua. Dobara koshish karein.')
+        return
+      }
 
-    if (response.status === 201) {
       const data = response.data
       setCaptain(data.captain)
       localStorage.setItem('token', data.token)
       navigate('/captain-home')
-    }
 
-    setMobileNumber('')
-    setAlternateMobileNumber('')
-    setFirstName('')
-    setLastName('')
-    setPassword('')
-    setVehicleType('')
-    setCarCategory('')
-    setCarModel('')
-    setAutoCategory('')
-    setAutoModel('')
-    setTruckCategory('')
-    setTruckModel('')
-    setAadhaarImage(null)
-    setPanImage(null)
-    setDrivingLicenceImage(null)
-    setPoliceVerificationImage(null)
-    setCaptainPhotoImage(null)
+      setMobileNumber('')
+      setAlternateMobileNumber('')
+      setFirstName('')
+      setLastName('')
+      setPassword('')
+      setVehicleType('')
+      setCarCategory('')
+      setCarModel('')
+      setAutoCategory('')
+      setAutoModel('')
+      setTruckCategory('')
+      setTruckModel('')
+      setAadhaarImage(null)
+      setPanImage(null)
+      setDrivingLicenceImage(null)
+      setPoliceVerificationImage(null)
+      setCaptainPhotoImage(null)
+    } catch (error) {
+      setSignupError(getSignupErrorMessage(error))
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
     <main className="auth-page">
+      {signupError && (
+        <div className="fixed inset-x-4 top-4 z-50 mx-auto w-full max-w-md" role="alert" aria-live="assertive">
+          <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-white p-4 text-red-800 shadow-xl shadow-red-900/10">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-50">
+              <i className="ri-error-warning-line text-xl" aria-hidden="true" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold">Captain account create nahi hua</p>
+              <p className="mt-1 text-sm leading-5">{signupError}</p>
+            </div>
+            <button
+              type="button"
+              className="rounded-full p-1 text-red-500 transition hover:bg-red-50 hover:text-red-700"
+              aria-label="Error message band karein"
+              onClick={() => setSignupError('')}
+            >
+              <i className="ri-close-line text-xl" aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+      )}
       <section className="auth-card auth-card--signup">
         <BrandLogo />
         <h1>Join as a captain</h1>
@@ -380,9 +414,10 @@ const CaptainSignup = () => {
 
           <button
             type="submit"
-            className="bg-[#111] text-white font-semibold mb-3 rounded-lg px-4 py-2 w-full text-lg"
+            disabled={isSubmitting}
+            className="bg-[#111] text-white font-semibold mb-3 rounded-lg px-4 py-2 w-full text-lg disabled:cursor-not-allowed disabled:opacity-70"
           >
-            Create captain account
+            {isSubmitting ? 'Account create ho raha hai…' : 'Create captain account'}
           </button>
         </form>
 

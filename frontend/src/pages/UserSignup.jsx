@@ -5,6 +5,7 @@ import { UserDataContext } from '../context/UserContext'
 import PhoneNumberInput from '../components/PhoneNumberInput'
 import BrandLogo from '../components/BrandLogo'
 import { autoVehicleOptions, carVehicleOptions, truckVehicleOptions } from '../constants/vehicleOptions'
+import { getSignupErrorMessage } from '../utils/getSignupErrorMessage'
 
 const UserSignup = () => {
   const [ countryCode, setCountryCode ] = useState('+91')
@@ -99,18 +100,7 @@ const UserSignup = () => {
       setLastName('')
       setPassword('')
     } catch (error) {
-      const validationMessages = Array.isArray(error.response?.data?.errors)
-        ? error.response.data.errors.map((item) => item.msg).filter(Boolean).join(' ')
-        : ''
-      const responseMessage = error.response?.data?.message
-      const errorMessage = responseMessage ||
-        validationMessages ||
-        (!error.response
-          ? 'Server se connection nahi ho paaya. Internet connection check karke dobara koshish karein.'
-          : error.response.status >= 500
-            ? 'Server abhi unavailable hai. Thodi der baad dobara koshish karein.'
-            : 'Account create nahi ho paya. Details check karke dobara koshish karein.')
-      setSignupError(errorMessage)
+      setSignupError(getSignupErrorMessage(error))
     } finally {
       setIsSubmitting(false)
     }
