@@ -112,6 +112,9 @@ module.exports.startLocationStream = async (onLocationEvent) => {
 
     try {
         await client.connect();
+        const pingResponse = await client.ping();
+        console.log('Redis ping response:', pingResponse);
+
         await kafkaProducer.connect();
         await kafkaConsumer.connect();
         await kafkaConsumer.subscribe({ topic: process.env.KAFKA_TOPIC, fromBeginning: false });

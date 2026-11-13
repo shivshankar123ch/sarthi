@@ -60,7 +60,7 @@ async function startServer() {
         await startLocationStream(sendCaptainLocationToRider);
         console.log('Connected to Redis and Kafka');
     } catch (error) {
-        console.error('Failed to start backend:', error.message);
+        console.error('Failed to start backend:', error.stack || error);
         process.exitCode = 1;
         await closeBackend(server);
         return;
@@ -75,6 +75,6 @@ async function startServer() {
 }
 
 startServer().catch(error => {
-    console.error('Failed to start backend:', error.message);
+    console.error('Failed to start backend:', error.stack || error);
     process.exitCode = 1;
 });
