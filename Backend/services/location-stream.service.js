@@ -1,4 +1,4 @@
-const { createClient } = require('redis');
+const Redis = require('ioredis');
 const createKafkaClient = require('../kafka');
 
 const CAPTAIN_LOCATIONS_KEY = 'captain:locations';
@@ -30,15 +30,17 @@ async function cacheLocation(client, captainId, location) {
         updatedAt
     };
 
-    await client.geoAdd(CAPTAIN_LOCATIONS_KEY, {
-        longitude: coordinates.longitude,
-        latitude: coordinates.latitude,
-        member: captainId
-    });
+    await client.geoadd(
+        CAPTAIN_LOCATIONS_KEY,
+        coordinates.longitude,
+        coordinates.latitude,
+        captainId
+    );
     await client.set(
         `${LOCATION_KEY_PREFIX}${captainId}`,
         JSON.stringify(coordinates),
-        { EX: LOCATION_TTL_SECONDS }
+        'EX',
+        LOCATION_TTL_SECONDS
     );
 }
 
@@ -76,8 +78,7 @@ module.exports.startLocationStream = async (onLocationEvent) => {
     }
 
     const requiredVariables = [
-        'REDIS_HOST',
-        'REDIS_PORT',
+        'REDIS_URL',
         'KAFKA_BROKERS',
         'KAFKA_CLIENT_ID',
         'KAFKA_TOPIC',
@@ -88,26 +89,21 @@ module.exports.startLocationStream = async (onLocationEvent) => {
         throw new Error(`Missing location-service configuration: ${missingVariables.join(', ')}`);
     }
 
-    const redisPort = Number(process.env.REDIS_PORT);
-    if (!Number.isInteger(redisPort) || redisPort < 1 || redisPort > 65535) {
-        throw new Error('REDIS_PORT must be an integer between 1 and 65535');
+    const redisOptions = {
+        lazyConnect: true,
+        maxRetriesPerRequest: 3,
+        connectTimeout: 10000,
+        retryStrategy(times) {
+            return Math.min(times * 1000, 5000);
+        }
+    };
+    if (process.env.REDIS_TLS === 'true') {
+        redisOptions.tls = {};
     }
 
-    const client = createClient({
-        username: process.env.REDIS_USERNAME || 'default',
-        password: process.env.REDIS_PASSWORD,
-        socket: {
-            host: process.env.REDIS_HOST,
-            port: redisPort,
-            tls: process.env.REDIS_TLS === 'true',
-            connectTimeout: 5000,
-            reconnectStrategy: retries => retries < 3
-                ? (retries + 1) * 200
-                : new Error('Redis connection retries exceeded')
-        }
-    });
+    const client = new Redis(process.env.REDIS_URL, redisOptions);
     client.on('connect', () => console.log('Redis connecting...'));
-    client.on('ready', () => console.log('Redis authenticated and ready!'));
+    client.on('ready', () => console.log('Redis ready'));
     client.on('error', error => console.error('Redis client error:', error.message));
 
     const kafka = createKafkaClient();
@@ -132,7 +128,7 @@ module.exports.startLocationStream = async (onLocationEvent) => {
         await Promise.allSettled([
             kafkaConsumer.disconnect(),
             kafkaProducer.disconnect(),
-            client.quit()
+            Promise.resolve().then(() => client.disconnect())
         ]);
         throw error;
     }
@@ -170,17 +166,22 @@ module.exports.getNearbyCaptainLocations = async ({ latitude, longitude, radiusK
         throw new Error('Location stream has not been initialized');
     }
 
-    const captainIds = await redisClient.geoSearch(
+    const captainIds = await redisClient.geosearch(
         CAPTAIN_LOCATIONS_KEY,
-        { longitude, latitude },
-        { radius: radiusKm, unit: 'km', SORT: 'ASC' }
+        'FROMLONLAT',
+        longitude,
+        latitude,
+        'BYRADIUS',
+        radiusKm,
+        'km',
+        'ASC'
     );
     if (!captainIds.length) {
         return [];
     }
 
-    const cachedLocations = await redisClient.mGet(
-        captainIds.map(captainId => `${LOCATION_KEY_PREFIX}${captainId}`)
+    const cachedLocations = await redisClient.mget(
+        ...captainIds.map(captainId => `${LOCATION_KEY_PREFIX}${captainId}`)
     );
 
     return captainIds.reduce((locations, captainId, index) => {
