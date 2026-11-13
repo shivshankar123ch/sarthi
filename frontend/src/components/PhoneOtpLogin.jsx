@@ -7,6 +7,17 @@ import BrandLogo from './BrandLogo'
 import driverCityRoad from '../assets/driver-city-road.svg'
 import './PhoneOtpLogin.css'
 
+const logOtpRequestError = (action, error) => {
+  console.error(`[OTP] ${action} request failed`, {
+    method: error.config?.method?.toUpperCase(),
+    url: error.config?.url,
+    status: error.response?.status ?? null,
+    code: error.code ?? null,
+    message: error.message,
+    responseMessage: error.response?.data?.message ?? null,
+  })
+}
+
 const PhoneOtpLogin = ({ accountType = 'user', showRoadAnimation = false }) => {
   const [countryCode, setCountryCode] = useState('+91')
   const [mobileNumber, setMobileNumber] = useState('')
@@ -32,6 +43,7 @@ const PhoneOtpLogin = ({ accountType = 'user', showRoadAnimation = false }) => {
       setVerificationTicket(response.data.ticket)
       setOtp('')
     } catch (error) {
+      logOtpRequestError('send', error)
       setErrorMessage(
         error.response?.data?.message || error.message || 'OTP bhejne mein dikkat hui. Dobara koshish karein.',
       )
@@ -58,6 +70,7 @@ const PhoneOtpLogin = ({ accountType = 'user', showRoadAnimation = false }) => {
 
       navigate(isCaptainLogin ? '/captain-signup' : '/motor-owner-signup')
     } catch (error) {
+      logOtpRequestError('verify', error)
       if (error.response?.status === 503) {
         setErrorMessage('Server par 2Factor OTP setup nahi hai. Backend API key configure karein.')
       } else if (error.response) {

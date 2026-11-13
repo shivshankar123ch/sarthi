@@ -22,6 +22,8 @@ const UserSignup = () => {
   const [truckCategory, setTruckCategory] = useState('')
   const [ truckModel, setTruckModel ] = useState('')
   const [ documents, setDocuments ] = useState({})
+  const [signupError, setSignupError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const documentFields = vehicleType === 'truck'
     ? [
@@ -51,46 +53,67 @@ const UserSignup = () => {
 
   const submitHandler = async (e) => {
     e.preventDefault()
-    const newUser = new FormData()
-    newUser.append('fullname[firstname]', firstName)
-    newUser.append('fullname[lastname]', lastName)
-    newUser.append('phone', `${countryCode}${mobileNumber}`)
-    if (alternateMobileNumber) {
-      newUser.append('alternatePhone', `${alternateCountryCode}${alternateMobileNumber}`)
-    }
-    newUser.append('password', password)
-    newUser.append('vehicleType', vehicleType)
-    if (vehicleType === 'car') {
-      newUser.append('carCategory', carCategory)
-      newUser.append('carModel', carModel)
-    }
-    if (vehicleType === 'auto') {
-      newUser.append('autoCategory', autoCategory)
-      newUser.append('autoModel', autoModel)
-    }
-    if (vehicleType === 'truck') {
-      newUser.append('truckCategory', truckCategory)
-      newUser.append('truckModel', truckModel)
-    }
-    for (const [field, image] of Object.entries(documents)) {
-      if (image) newUser.append(field, image)
-    }
+    setSignupError('')
+    setIsSubmitting(true)
 
-    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/register`, newUser)
+    try {
+      const newUser = new FormData()
+      newUser.append('fullname[firstname]', firstName)
+      newUser.append('fullname[lastname]', lastName)
+      newUser.append('phone', `${countryCode}${mobileNumber}`)
+      if (alternateMobileNumber) {
+        newUser.append('alternatePhone', `${alternateCountryCode}${alternateMobileNumber}`)
+      }
+      newUser.append('password', password)
+      newUser.append('vehicleType', vehicleType)
+      if (vehicleType === 'car') {
+        newUser.append('carCategory', carCategory)
+        newUser.append('carModel', carModel)
+      }
+      if (vehicleType === 'auto') {
+        newUser.append('autoCategory', autoCategory)
+        newUser.append('autoModel', autoModel)
+      }
+      if (vehicleType === 'truck') {
+        newUser.append('truckCategory', truckCategory)
+        newUser.append('truckModel', truckModel)
+      }
+      for (const [field, image] of Object.entries(documents)) {
+        if (image) newUser.append(field, image)
+      }
 
-    if (response.status === 201) {
+      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/register`, newUser)
+      if (response.status !== 201) {
+        setSignupError(response.data?.message || 'Account create nahi hua. Dobara koshish karein.')
+        return
+      }
+
       const data = response.data
       setUser(data.user)
       localStorage.setItem('token', data.token)
       navigate('/home')
+
+      setMobileNumber('')
+      setAlternateMobileNumber('')
+      setFirstName('')
+      setLastName('')
+      setPassword('')
+    } catch (error) {
+      const validationMessages = Array.isArray(error.response?.data?.errors)
+        ? error.response.data.errors.map((item) => item.msg).filter(Boolean).join(' ')
+        : ''
+      const responseMessage = error.response?.data?.message
+      const errorMessage = responseMessage ||
+        validationMessages ||
+        (!error.response
+          ? 'Server se connection nahi ho paaya. Internet connection check karke dobara koshish karein.'
+          : error.response.status >= 500
+            ? 'Server abhi unavailable hai. Thodi der baad dobara koshish karein.'
+            : 'Account create nahi ho paya. Details check karke dobara koshish karein.')
+      setSignupError(errorMessage)
+    } finally {
+      setIsSubmitting(false)
     }
-
-
-    setMobileNumber('')
-    setAlternateMobileNumber('')
-    setFirstName('')
-    setLastName('')
-    setPassword('')
 
   }
   return (
@@ -101,9 +124,23 @@ const UserSignup = () => {
           <h1>Motor-Owner Account Create</h1>
           <p className="auth-subtitle">A few details and you will be ready to ride.</p>
 
-          <form onSubmit={(e) => {
-            submitHandler(e)
-          }}>
+          {signupError && (
+            <div
+              className='mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-800 shadow-sm'
+              role='alert'
+              aria-live='assertive'
+            >
+              <span className='mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-100'>
+                <i className='ri-error-warning-line text-lg' aria-hidden='true' />
+              </span>
+              <div>
+                <p className='font-semibold'>Account create nahi hua</p>
+                <p className='mt-1 text-sm leading-5'>{signupError}</p>
+              </div>
+            </div>
+          )}
+
+          <form onSubmit={submitHandler}>
 
             <h3 className='text-lg w-1/2  font-medium mb-2'>What is your name</h3>
             <div className='flex gap-4 mb-7'>
@@ -382,8 +419,12 @@ const UserSignup = () => {
             )}
 
             <button
-              className='bg-[#111] text-white font-semibold mb-3 rounded-lg px-4 py-2 w-full text-lg placeholder:text-base'
-            >Create account</button>
+              type='submit'
+              disabled={isSubmitting}
+              className='bg-[#111] text-white font-semibold mb-3 rounded-lg px-4 py-2 w-full text-lg placeholder:text-base disabled:cursor-not-allowed disabled:opacity-70'
+            >
+              {isSubmitting ? 'Account create ho raha hai…' : 'Create account'}
+            </button>
 
           </form>
           <p className='text-center'>Already have a account? <Link to='/owner-login' className='text-blue-600'>Login here</Link></p>
