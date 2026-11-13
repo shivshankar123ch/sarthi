@@ -85,7 +85,7 @@ const UserSignup = () => {
 
       const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/register`, newUser)
       if (response.status !== 201) {
-        setSignupError(response.data?.message || 'Account create nahi hua. Dobara koshish karein.')
+        setSignupError(response.data?.message || 'Account could not be created. Please try again.')
         return
       }
 
@@ -100,7 +100,7 @@ const UserSignup = () => {
       setLastName('')
       setPassword('')
     } catch (error) {
-      setSignupError(getSignupErrorMessage(error))
+      setSignupError(getSignupErrorMessage(error, 'en'))
     } finally {
       setIsSubmitting(false)
     }
@@ -124,7 +124,7 @@ const UserSignup = () => {
                 <i className='ri-error-warning-line text-lg' aria-hidden='true' />
               </span>
               <div>
-                <p className='font-semibold'>Account create nahi hua</p>
+                <p className='font-semibold'>Account could not be created</p>
                 <p className='mt-1 text-sm leading-5'>{signupError}</p>
               </div>
             </div>
@@ -413,7 +413,7 @@ const UserSignup = () => {
               disabled={isSubmitting}
               className='bg-[#111] text-white font-semibold mb-3 rounded-lg px-4 py-2 w-full text-lg placeholder:text-base disabled:cursor-not-allowed disabled:opacity-70'
             >
-              {isSubmitting ? 'Account create ho raha hai…' : 'Create account'}
+              {isSubmitting ? 'Creating account…' : 'Create account'}
             </button>
 
           </form>

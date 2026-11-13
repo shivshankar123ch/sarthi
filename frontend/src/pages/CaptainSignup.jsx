@@ -417,7 +417,7 @@ const CaptainSignup = () => {
             disabled={isSubmitting}
             className="bg-[#111] text-white font-semibold mb-3 rounded-lg px-4 py-2 w-full text-lg disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {isSubmitting ? 'Account create ho raha hai…' : 'Create captain account'}
+            {isSubmitting ? 'Creating account…' : 'Create captain account'}
           </button>
         </form>
 
