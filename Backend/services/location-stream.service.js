@@ -99,6 +99,7 @@ module.exports.startLocationStream = async (onLocationEvent) => {
         socket: {
             host: process.env.REDIS_HOST,
             port: redisPort,
+            tls: process.env.REDIS_TLS === 'true',
             connectTimeout: 5000,
             reconnectStrategy: retries => retries < 3
                 ? (retries + 1) * 200

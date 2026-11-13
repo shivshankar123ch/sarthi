@@ -7,10 +7,12 @@ Set `MONGODB_URI` in `Backend/.env` to your MongoDB connection string; for a
 local MongoDB instance, use `mongodb://127.0.0.1:27017/NextDriver`. Configure
 Redis with `REDIS_HOST` and `REDIS_PORT`; `REDIS_USERNAME` defaults to `default`,
 and `REDIS_PASSWORD` is optional when authentication is not enabled. Set
-`KAFKA_BROKERS`, `KAFKA_CLIENT_ID`, `KAFKA_TOPIC`, and `KAFKA_GROUP_ID` in
-`Backend/.env` for the live driver-location stream. The Kafka topic must already
-exist. Set `MAPBOX_SECRET_TOKEN` to a secret Mapbox access token with geocoding
-and directions-matrix access. Keep the token on the backend and out of source
+`REDIS_TLS=true` when the Redis provider requires TLS; leave it unset for a
+local Redis server without TLS. Set `KAFKA_BROKERS`, `KAFKA_CLIENT_ID`,
+`KAFKA_TOPIC`, and `KAFKA_GROUP_ID` in `Backend/.env` for the live
+driver-location stream. The Kafka topic must already exist. Set
+`MAPBOX_SECRET_TOKEN` to a secret Mapbox access token with geocoding and
+directions-matrix access. Keep the token on the backend and out of source
 control. Start the API from the `Backend` directory with `npx nodemon
 server.js`. The HTTP server opens its port before it connects to MongoDB and
 initializes Redis and Kafka. Existing email-only user records are preserved,
