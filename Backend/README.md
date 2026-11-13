@@ -3,7 +3,7 @@
 ## Run locally
 
 The backend requires MongoDB, Redis, and Kafka to be running before it starts.
-Set `DB_CONNECT` in `Backend/.env` to your MongoDB connection string; for a
+Set `MONGODB_URI` in `Backend/.env` to your MongoDB connection string; for a
 local MongoDB instance, use `mongodb://127.0.0.1:27017/NextDriver`. Set
 `REDIS_URL`, `KAFKA_BROKERS`, `KAFKA_CLIENT_ID`, `KAFKA_TOPIC`, and
 `KAFKA_GROUP_ID` in `Backend/.env` for the live driver-location stream. The
