@@ -10,8 +10,8 @@ local MongoDB instance, use `mongodb://127.0.0.1:27017/NextDriver`. Set
 Kafka topic must already exist. Set `MAPBOX_SECRET_TOKEN` to a secret Mapbox
 access token with geocoding and directions-matrix access. Keep the token on the
 backend and out of source control. Start the API from the `Backend` directory
-with `npx nodemon server.js`. The server starts accepting requests after it
-connects to MongoDB, Redis, and Kafka. Existing email-only user records are
+with `npx nodemon server.js`. The HTTP server opens its port before it connects
+to MongoDB and initializes Redis and Kafka. Existing email-only user records are
 preserved, but existing email-only user/captain records need a phone number
 added before those accounts can use mobile-number login.
 

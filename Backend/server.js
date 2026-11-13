@@ -1,6 +1,7 @@
 const dotenv = require('dotenv');
 const path = require('path');
 const http = require('http');
+const mongoose = require('mongoose');
 const connectToDb = require('./db/db');
 const {
     startLocationStream,
@@ -9,10 +10,29 @@ const {
 
 dotenv.config({ path: path.join(__dirname, '.env') });
 
-async function startServer() {
-    await connectToDb();
-    console.log('Connected to DB');
+async function closeBackend(server) {
+    let failed = false;
+    try {
+        await new Promise((resolve, reject) => {
+            server.close(error => error ? reject(error) : resolve());
+        });
+    } catch (error) {
+        failed = true;
+        console.error('Failed to close HTTP server:', error.message);
+    }
 
+    const results = await Promise.allSettled([ stopLocationStream(), mongoose.disconnect() ]);
+
+    const failures = results.filter(result => result.status === 'rejected');
+    failures.forEach(result => {
+        failed = true;
+        console.error('Failed to close backend service:', result.reason.message);
+    });
+
+    return !failed;
+}
+
+async function startServer() {
     const app = require('./app');
     const {
         initializeSocket,
@@ -22,23 +42,32 @@ async function startServer() {
     const server = http.createServer(app);
 
     initializeSocket(server);
-    await startLocationStream(sendCaptainLocationToRider);
-    console.log('Connected to Redis and Kafka');
 
-    server.listen(port, () => {
-        console.log(`Server is running on port ${port}`);
+    await new Promise((resolve, reject) => {
+        const handleError = error => reject(error);
+        server.once('error', handleError);
+        server.listen(port, () => {
+            server.removeListener('error', handleError);
+            console.log(`Server is running on port ${port}`);
+            resolve();
+        });
     });
 
+    try {
+        await connectToDb();
+        console.log('Connected to DB');
+
+        await startLocationStream(sendCaptainLocationToRider);
+        console.log('Connected to Redis and Kafka');
+    } catch (error) {
+        console.error('Failed to start backend:', error.message);
+        process.exitCode = 1;
+        await closeBackend(server);
+        return;
+    }
+
     const shutdown = async () => {
-        server.close(async () => {
-            try {
-                await stopLocationStream();
-                process.exitCode = 0;
-            } catch (error) {
-                console.error('Failed to close location services:', error.message);
-                process.exitCode = 1;
-            }
-        });
+        process.exitCode = await closeBackend(server) ? 0 : 1;
     };
 
     process.once('SIGINT', shutdown);
