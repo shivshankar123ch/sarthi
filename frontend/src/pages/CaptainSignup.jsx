@@ -68,7 +68,7 @@ const CaptainSignup = () => {
 
       const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/captains/register`, captainData)
       if (response.status !== 201) {
-        setSignupError(response.data?.message || 'Account create nahi hua. Dobara koshish karein.')
+        setSignupError(response.data?.message || 'Account could not be created. Please try again.')
         return
       }
 
@@ -95,7 +95,7 @@ const CaptainSignup = () => {
       setPoliceVerificationImage(null)
       setCaptainPhotoImage(null)
     } catch (error) {
-      setSignupError(getSignupErrorMessage(error))
+      setSignupError(getSignupErrorMessage(error, 'en'))
     } finally {
       setIsSubmitting(false)
     }
@@ -110,13 +110,13 @@ const CaptainSignup = () => {
               <i className="ri-error-warning-line text-xl" aria-hidden="true" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="font-semibold">Captain account create nahi hua</p>
+              <p className="font-semibold">Captain account could not be created</p>
               <p className="mt-1 text-sm leading-5">{signupError}</p>
             </div>
             <button
               type="button"
               className="rounded-full p-1 text-red-500 transition hover:bg-red-50 hover:text-red-700"
-              aria-label="Error message band karein"
+              aria-label="Dismiss error message"
               onClick={() => setSignupError('')}
             >
               <i className="ri-close-line text-xl" aria-hidden="true" />

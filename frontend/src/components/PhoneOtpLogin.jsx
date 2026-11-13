@@ -175,7 +175,7 @@ const PhoneOtpLogin = ({ accountType = 'user', showRoadAnimation = false }) => {
                 </button>
               </form>
               <button className="phone-login-resend" type="button" disabled={isLoading} onClick={sendOtp}>
-                Code nahi mila? Dobara bhejein
+                <i className="ri-refresh-line" aria-hidden="true" /> Resend OTP
               </button>
             </>
           )}
