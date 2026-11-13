@@ -2,7 +2,7 @@ const userModel = require('../models/user.model');
 const userService = require('../services/user.service');
 const twoFactorOtpService = require('../services/twoFactorOtp.service');
 const { validationResult } = require('express-validator');
-const blackListTokenModel = require('../models/blackListToken.model');
+const blackListTokenModel = require('../models/blacklistToken.model');
 const {
     deleteUserVehicleDocuments,
     findUserVehicleDocument,

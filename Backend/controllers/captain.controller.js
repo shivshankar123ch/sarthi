@@ -1,7 +1,7 @@
 const captainModel = require('../models/captain.model');
 const captainService = require('../services/captain.service');
 const twoFactorOtpService = require('../services/twoFactorOtp.service');
-const blackListTokenModel = require('../models/blackListToken.model');
+const blackListTokenModel = require('../models/blacklistToken.model');
 const {
     deleteCaptainDocuments,
     findCaptainDocument,
